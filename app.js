@@ -42,6 +42,23 @@ const checkUpdateContactFields = checkReqFields([
   'type'
 ])
 
+const checkVenueFields = checkReqFields([
+  'venueName',
+  'address',
+  'contactName',
+  'phone'
+])
+
+const checkUpdateVenueFields = checkReqFields([
+  'venueName',
+  'address',
+  'contactName',
+  'phone',
+  '_id',
+  '_rev',
+  'type'
+])
+
 app.use(bodyParser.json())
 
 app.get('/', function(req, res, next) {
@@ -210,14 +227,79 @@ app.get('/contacts', function(req, res, next) {
 ///////////////////
 
 //////CREATE
+app.post('/venues/new', function(req, res, next) {
+  const venue = pathOr(null, ['body'], req)
+  const fieldResults = checkVenueFields(venue)
+
+  if (fieldResults.length > 0) {
+    return next(
+      new HTTPError(400, 'Missing required fields', { fields: fieldResults })
+    )
+  }
+  dal.createVenue(venue, function(err, result) {
+    if (err) return next(new HTTPError(err.status, err.message, err))
+    res.status(201).send(result)
+  })
+})
 
 //////READ
+app.get('/venues/:id', function(req, res, next) {
+  const id = pathOr(null, ['params', 'id'], req)
+
+  if (id) {
+    dal.showVenue(id, function(err, doc) {
+      if (err) return next(new HTTPError(err.status, err.message, err))
+      res.status(200).send(doc)
+    })
+  } else {
+    return next(new HTTPError(400, 'Missing id in path'))
+  }
+})
 
 //////UPDATE
+app.put('/venues/:id/edit', function(req, res, next) {
+  const venue = pathOr(null, ['params', 'id'], req)
+  const body = pathOr(null, ['body'], req)
+
+  const fieldResults = checkUpdateVenueFields(body)
+  if (!body || keys(body).length === 0)
+    return next(new HTTPError(400, 'Missing venue in request body'))
+
+  if (fieldResults.length > 0) {
+    return next(
+      new HTTPError(400, 'Missing required fields: ', {
+        fields: fieldResults
+      })
+    )
+  }
+
+  dal.updateVenue(body, function(err, response) {
+    if (err) return next(new HTTPError(err.status, err.message, err))
+    res.status(200).send(response)
+  })
+})
 
 //////DELETE
+app.delete('/venues/:id/edit', function(req, res, next) {
+  const id = pathOr(null, ['params', 'id'], req)
+
+  dal.deleteVenue(id, function(err, result) {
+    if (err) return next(new HTTPError(err.status, err.message, err))
+    res.status(200).send(result)
+  })
+})
 
 //////LIST
+app.get('/venues', function(req, res, next) {
+  const limit = pathOr(5, ['query', 'limit'], req)
+  const lastItem = pathOr(null, ['query', 'lastItem'], req)
+  const filter = pathOr(null, ['query', 'filter'], req)
+
+  dal.listVenues(filter, lastItem, Number(limit), function(err, data) {
+    if (err) return next(new HTTPError(err.status, err.message, err))
+    res.status(200).send(data)
+  })
+})
 
 ////////////////////
 ///ERROR MIDDLEWARE

@@ -7,6 +7,8 @@ const generateProfilePk = buildPk('profile_')
 const generateContactPk = buildPk('contact_')
 const generateVenuePk = buildPk('venue_')
 const { pathOr, assoc, split, head, last } = require('ramda')
+const uuidv4 = require('uuid/v4')
+const uuid = uuidv4()
 
 const test = callback => {
   callback(null, 'dal is ok')
@@ -174,14 +176,80 @@ function listContacts(filter, lastItem, limit, callback) {
 ///////////////////
 
 //////CREATE
+const createVenue = (venue, callback) => {
+  const name = pathOr('', ['venueName'], venue)
+  const address = pathOr('', ['address'], venue)
+  const pk = generateVenuePk(`${name}_${address}`)
+  console.log('pk', pk)
+
+  venue = assoc('_id', pk, venue)
+  venue = assoc('type', 'venue', venue)
+
+  createDoc(venue, callback)
+}
 
 //////READ
+const showVenue = (id, callback) => {
+  db.get(id, function(err, doc) {
+    if (err) return callback(err)
+
+    doc.type === 'venue'
+      ? callback(null, doc)
+      : callback(new HTTPError(400, 'Document is not a venue'))
+  })
+}
 
 //////UPDATE
+function updateVenue(venue, callback) {
+  venue = assoc('type', 'venue', venue)
+  createDoc(venue, callback)
+}
 
 //////DELETE
+function deleteVenue(id, callback) {
+  db
+    .get(id)
+    .then(doc => db.remove(doc))
+    .then(doc => callback(null, doc))
+    .then(err => callback(err))
+}
 
 //////LIST
+function listVenues(filter, lastItem, limit, callback) {
+  var query = {}
+  if (filter) {
+    const arrFilter = split(':', filter)
+    const filterField = head(arrFilter)
+    const filterValue = last(arrFilter)
+
+    const selectorValue = assoc(filterField, filterValue, {})
+    query = {
+      selector: selectorValue,
+      limit
+    }
+  } else if (lastItem) {
+    query = {
+      selector: {
+        _id: { $gt: lastItem },
+        type: 'venue'
+      },
+      limit
+    }
+  } else {
+    query = {
+      selector: {
+        _id: { $gte: null },
+        type: 'venue'
+      },
+      limit
+    }
+  }
+
+  find(query, function(err, data) {
+    if (err) return callback(err)
+    callback(null, data.docs)
+  })
+}
 
 ////////////////////
 ///HELPER FUNCTIONS
@@ -206,7 +274,12 @@ const dal = {
   showContact,
   updateContact,
   deleteContact,
-  listContacts
+  listContacts,
+  createVenue,
+  showVenue,
+  updateVenue,
+  deleteVenue,
+  listVenues
 }
 
 module.exports = dal

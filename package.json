@@ -1,0 +1,25 @@
+{
+  "name": "daily-musician-db",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node app.js",
+    "load": "node load-data.js",
+    "loadIndex": "node load-indexes.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.17.2",
+    "dotenv": "^4.0.0",
+    "express": "^4.15.3",
+    "mysql": "^2.14.0",
+    "node-http-error": "^1.1.0",
+    "pouchdb": "6.2.0",
+    "pouchdb-find": "6.2.0",
+    "ramda": "^0.24.1"
+  }
+}

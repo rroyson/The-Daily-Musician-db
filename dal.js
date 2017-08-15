@@ -100,7 +100,12 @@ const createContact = (contact, callback) => {
   const firstName = pathOr('', ['firstName'], contact)
   const lastName = pathOr('', ['lastName'], contact)
   const email = pathOr('', ['email'], contact)
-  const pk = generateContactPk(`${firstName}_${lastName}_${email}`)
+  const profileId = pathOr('', ['profileId'], contact)
+  console.log('profileId', profileId)
+  console.log('contact', contact)
+  const pk = generateContactPk(`${profileId}${firstName}_${lastName}_${email}`)
+
+  console.log('pk', pk)
 
   contact = assoc('_id', pk, contact)
   contact = assoc('type', 'contact', contact)
@@ -136,7 +141,13 @@ function deleteContact(id, callback) {
 
 //////LIST
 function listContacts(filter, lastItem, limit, callback) {
+  //   const getProfileId = id => {
+  //     db.get(id).then(docs => callback(null, docs)).catch(err => callback(err))
+  //   }
+  // }
+
   var query = {}
+
   if (filter) {
     const arrFilter = split(':', filter)
     const filterField = head(arrFilter)

@@ -1,5 +1,6 @@
 require('dotenv').config()
 const express = require('express')
+const cors = require('cors')
 const app = express()
 const dal = require(`./dal`)
 const port = process.env.PORT || 4000
@@ -59,6 +60,8 @@ const checkUpdateVenueFields = checkReqFields([
   'type'
 ])
 
+app.use(cors({ credentials: true }))
+
 app.use(bodyParser.json())
 
 app.get('/', function(req, res, next) {
@@ -70,7 +73,7 @@ app.get('/', function(req, res, next) {
 ////////////////////
 
 //////CREATE
-app.post('/signup', function(req, res, next) {
+app.post('/profiles', function(req, res, next) {
   const profile = pathOr(null, ['body'], req)
   const fieldResults = checkProfileFields(profile)
 
@@ -85,7 +88,7 @@ app.post('/signup', function(req, res, next) {
   })
 })
 //////READ
-app.get('/home/:id', function(req, res, next) {
+app.get('/profiles/:id', function(req, res, next) {
   const id = pathOr(null, ['params', 'id'], req)
 
   if (id) {
@@ -99,7 +102,7 @@ app.get('/home/:id', function(req, res, next) {
 })
 
 //////UPDATE
-app.put('/profile/:id/edit', function(req, res, next) {
+app.put('/profiles/:id', function(req, res, next) {
   const profile = pathOr(null, ['params', 'id'], req)
   const body = pathOr(null, ['body'], req)
 
@@ -122,7 +125,7 @@ app.put('/profile/:id/edit', function(req, res, next) {
 })
 
 //////DELETE
-app.delete('/profile/:id/edit', function(req, res, next) {
+app.delete('/profiles/:id', function(req, res, next) {
   const id = pathOr(null, ['params', 'id'], req)
 
   dal.deleteProfile(id, function(err, result) {
@@ -148,7 +151,8 @@ app.get('/profiles', function(req, res, next) {
 ///////////////////
 
 //////CREATE
-app.post('/contacts/new', function(req, res, next) {
+app.post('/profiles/:id/contacts', function(req, res, next) {
+  const id = pathOr(null, ['profile', '_id'], req)
   const contact = pathOr(null, ['body'], req)
   const fieldResults = checkContactFields(contact)
 
@@ -164,11 +168,12 @@ app.post('/contacts/new', function(req, res, next) {
 })
 
 //////READ
-app.get('/contacts/:id', function(req, res, next) {
-  const id = pathOr(null, ['params', 'id'], req)
+app.get('/profiles/:id/contacts/:contactId', function(req, res, next) {
+  console.log('req')
+  const contactId = pathOr(null, ['params', 'contactId'], req)
 
-  if (id) {
-    dal.showContact(id, function(err, doc) {
+  if (contactId) {
+    dal.showContact(contactId, function(err, doc) {
       if (err) return next(new HTTPError(err.status, err.message, err))
       res.status(200).send(doc)
     })
@@ -178,9 +183,10 @@ app.get('/contacts/:id', function(req, res, next) {
 })
 
 //////UPDATE
-app.put('/contacts/:id/edit', function(req, res, next) {
+app.put('/profiles/:id/contacts/:contactId/edit', function(req, res, next) {
   const contact = pathOr(null, ['params', 'id'], req)
   const body = pathOr(null, ['body'], req)
+  console.log('req')
 
   const fieldResults = checkUpdateContactFields(body)
   if (!body || keys(body).length === 0)
@@ -201,7 +207,7 @@ app.put('/contacts/:id/edit', function(req, res, next) {
 })
 
 //////DELETE
-app.delete('/contacts/:id/edit', function(req, res, next) {
+app.delete('/profiles/:id/contacts/:contactId', function(req, res, next) {
   const id = pathOr(null, ['params', 'id'], req)
 
   dal.deleteContact(id, function(err, result) {
@@ -211,7 +217,8 @@ app.delete('/contacts/:id/edit', function(req, res, next) {
 })
 
 //////LIST
-app.get('/contacts', function(req, res, next) {
+app.get('/profiles/:id/contacts', function(req, res, next) {
+  //const id = pathOr(null, ['params', 'id'], req)
   const limit = pathOr(5, ['query', 'limit'], req)
   const lastItem = pathOr(null, ['query', 'lastItem'], req)
   const filter = pathOr(null, ['query', 'filter'], req)
@@ -227,7 +234,7 @@ app.get('/contacts', function(req, res, next) {
 ///////////////////
 
 //////CREATE
-app.post('/venues/new', function(req, res, next) {
+app.post('/venues', function(req, res, next) {
   const venue = pathOr(null, ['body'], req)
   const fieldResults = checkVenueFields(venue)
 
@@ -257,7 +264,7 @@ app.get('/venues/:id', function(req, res, next) {
 })
 
 //////UPDATE
-app.put('/venues/:id/edit', function(req, res, next) {
+app.put('/venues/:id', function(req, res, next) {
   const venue = pathOr(null, ['params', 'id'], req)
   const body = pathOr(null, ['body'], req)
 
@@ -280,7 +287,7 @@ app.put('/venues/:id/edit', function(req, res, next) {
 })
 
 //////DELETE
-app.delete('/venues/:id/edit', function(req, res, next) {
+app.delete('/venues/:id', function(req, res, next) {
   const id = pathOr(null, ['params', 'id'], req)
 
   dal.deleteVenue(id, function(err, result) {

@@ -49,6 +49,12 @@ function updateProfile(profile, callback) {
 function deleteProfile(id, callback) {
   db
     .get(id)
+    .then(
+      doc =>
+        doc.type === 'profile'
+          ? doc
+          : callback(new HTTPError(400, 'Document is not a profile'))
+    )
     .then(doc => db.remove(doc))
     .then(doc => callback(null, doc))
     .then(err => callback(err))
@@ -132,9 +138,15 @@ function updateContact(contact, callback) {
 }
 
 //////DELETE
-function deleteContact(id, contactId, callback) {
+function deleteContact(contactId, callback) {
   db
-    .get(id, contactId)
+    .get(contactId)
+    .then(
+      doc =>
+        doc.type === 'contact'
+          ? doc
+          : callback(new HTTPError(400, 'Document is not a contact'))
+    )
     .then(doc => db.remove(doc))
     .then(doc => callback(null, doc))
     .catch(err => callback(err))

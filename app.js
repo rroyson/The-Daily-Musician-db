@@ -208,13 +208,18 @@ app.put('/profiles/:id/contacts/:contactId/edit', function(req, res, next) {
 
 //////DELETE
 app.delete('/profiles/:id/contacts/:contactId', function(req, res, next) {
-  const id = pathOr(null, ['params', 'id'], req)
+  //  const id = pathOr(null, ['params', 'id'], req)
   const contactId = pathOr(null, ['params', 'contactId'], req)
-
-  dal.deleteContact(id, contactId, function(err, result) {
-    if (err) return next(new HTTPError(err.status, err.message, err))
-    res.status(200).send(result)
-  })
+  //console.log('app id', id)
+  // console.log('app contactId', contactId)
+  if (contactId) {
+    dal.deleteContact(contactId, function(err, result) {
+      if (err) return next(new HTTPError(err.status, err.message, err))
+      res.status(200).send(result)
+    })
+  } else {
+    return next(new HTTPError(400, 'Missing id in path'))
+  }
 })
 
 //////LIST

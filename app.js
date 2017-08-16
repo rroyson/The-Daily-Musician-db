@@ -103,6 +103,7 @@ app.get('/profiles/:id', function(req, res, next) {
 
 //////UPDATE
 app.put('/profiles/:id', function(req, res, next) {
+  console.log('hit db app.js')
   const profile = pathOr(null, ['params', 'id'], req)
   const body = pathOr(null, ['body'], req)
 
@@ -183,7 +184,7 @@ app.get('/profiles/:id/contacts/:contactId', function(req, res, next) {
 })
 
 //////UPDATE
-app.put('/profiles/:id/contacts/:contactId/edit', function(req, res, next) {
+app.put('/profiles/:id/contacts/:contactId', function(req, res, next) {
   const contact = pathOr(null, ['params', 'id'], req)
   const body = pathOr(null, ['body'], req)
   console.log('req')

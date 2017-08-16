@@ -209,8 +209,9 @@ app.put('/profiles/:id/contacts/:contactId/edit', function(req, res, next) {
 //////DELETE
 app.delete('/profiles/:id/contacts/:contactId', function(req, res, next) {
   const id = pathOr(null, ['params', 'id'], req)
+  const contactId = pathOr(null, ['params', 'contactId'], req)
 
-  dal.deleteContact(id, function(err, result) {
+  dal.deleteContact(id, contactId, function(err, result) {
     if (err) return next(new HTTPError(err.status, err.message, err))
     res.status(200).send(result)
   })
@@ -218,12 +219,13 @@ app.delete('/profiles/:id/contacts/:contactId', function(req, res, next) {
 
 //////LIST
 app.get('/profiles/:id/contacts', function(req, res, next) {
-  //const id = pathOr(null, ['params', 'id'], req)
+  const id = pathOr(null, ['params', 'id'], req)
+  console.log('id', id)
   const limit = pathOr(5, ['query', 'limit'], req)
   const lastItem = pathOr(null, ['query', 'lastItem'], req)
   const filter = pathOr(null, ['query', 'filter'], req)
 
-  dal.listContacts(filter, lastItem, Number(limit), function(err, data) {
+  dal.listContacts(id, filter, lastItem, Number(limit), function(err, data) {
     if (err) return next(new HTTPError(err.status, err.message, err))
     res.status(200).send(data)
   })

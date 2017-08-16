@@ -101,14 +101,15 @@ const createContact = (contact, callback) => {
   const lastName = pathOr('', ['lastName'], contact)
   const email = pathOr('', ['email'], contact)
   const profileId = pathOr('', ['profileId'], contact)
-  console.log('profileId', profileId)
-  console.log('contact', contact)
-  const pk = generateContactPk(`${profileId}${firstName}_${lastName}_${email}`)
+  console.log('profileId=', profileId)
+  console.log('contact=', contact)
+  const pk = generateContactPk(`${profileId}_${firstName}_${lastName}_${email}`)
 
   console.log('pk', pk)
 
   contact = assoc('_id', pk, contact)
   contact = assoc('type', 'contact', contact)
+  //contact = assoc('profileId', profileId, contact)
 
   createDoc(contact, callback)
 }
@@ -131,51 +132,68 @@ function updateContact(contact, callback) {
 }
 
 //////DELETE
-function deleteContact(id, callback) {
+function deleteContact(id, contactId, callback) {
   db
-    .get(id)
+    .get(id, contactId)
     .then(doc => db.remove(doc))
     .then(doc => callback(null, doc))
-    .then(err => callback(err))
+    .catch(err => callback(err))
 }
 
 //////LIST
-function listContacts(filter, lastItem, limit, callback) {
+function listContacts(profileId, filter, lastItem, limit, callback) {
+  limit = limit ? limit : 5
   //   const getProfileId = id => {
   //     db.get(id).then(docs => callback(null, docs)).catch(err => callback(err))
   //   }
   // }
+  // let query = {
+  //   selector: {
+  //     type: 'contact'
+  //   },
+  //   limit
+  // }
+  let query = {}
 
-  var query = {}
-
-  if (filter) {
-    const arrFilter = split(':', filter)
-    const filterField = head(arrFilter)
-    const filterValue = last(arrFilter)
-
-    const selectorValue = assoc(filterField, filterValue, {})
-    query = {
-      selector: selectorValue,
-      limit
-    }
-  } else if (lastItem) {
+  if (profileId) {
     query = {
       selector: {
-        _id: { $gt: lastItem },
-        type: 'contact'
-      },
-      limit
-    }
-  } else {
-    query = {
-      selector: {
-        _id: { $gte: null },
-        type: 'contact'
+        type: 'contact',
+        profileId
       },
       limit
     }
   }
 
+  //
+  //   if (filter) {
+  //     const arrFilter = split(':', filter)
+  //     const filterField = head(arrFilter)
+  //     const filterValue = last(arrFilter)
+  //
+  //     const selectorValue = assoc(filterField, filterValue, {})
+  //     query = {
+  //       selector: selectorValue,
+  //       limit
+  //     }
+  //   } else if (lastItem) {
+  //     query = {
+  //       selector: {
+  //         _id: { $gt: lastItem },
+  //         type: 'contact'
+  //       },
+  //       limit
+  //     }
+  //   } else {
+  //     query = {
+  //       selector: {
+  //         _id: { $gte: null },
+  //         type: 'contact'
+  //       },
+  //       limit
+  //     }
+  //   }
+  //
   find(query, function(err, data) {
     if (err) return callback(err)
     callback(null, data.docs)
@@ -271,6 +289,7 @@ function createDoc(doc, callback) {
 }
 
 function find(query, callback) {
+  console.log('query', query)
   query ? db.find(query, callback) : callback(null, [])
 }
 

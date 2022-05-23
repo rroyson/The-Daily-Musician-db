@@ -64,16 +64,14 @@ app.use(cors({ credentials: true }))
 
 app.use(bodyParser.json())
 
-app.get('/', function(req, res, next) {
+app.get('/', function (req, res, next) {
   res.send('Welcome to the Daily Musician API. Manage your career.')
 })
 
-////////////////////
-////////PROFILES
-////////////////////
+// PROFILES
 
-//////CREATE
-app.post('/profiles', function(req, res, next) {
+// CREATE
+app.post('/profiles', function (req, res, next) {
   const profile = pathOr(null, ['body'], req)
   const fieldResults = checkProfileFields(profile)
 
@@ -82,17 +80,17 @@ app.post('/profiles', function(req, res, next) {
       new HTTPError(400, 'Missing required fields', { fields: fieldResults })
     )
   }
-  dal.createProfile(profile, function(err, result) {
+  dal.createProfile(profile, function (err, result) {
     if (err) return next(new HTTPError(err.status, err.message, err))
     res.status(201).send(result)
   })
 })
-//////READ
-app.get('/profiles/:id', function(req, res, next) {
+// READ
+app.get('/profiles/:id', function (req, res, next) {
   const id = pathOr(null, ['params', 'id'], req)
 
   if (id) {
-    dal.showProfile(id, function(err, doc) {
+    dal.showProfile(id, function (err, doc) {
       if (err) return next(new HTTPError(err.status, err.message, err))
       res.status(200).send(doc)
     })
@@ -101,9 +99,8 @@ app.get('/profiles/:id', function(req, res, next) {
   }
 })
 
-//////UPDATE
-app.put('/profiles/:id', function(req, res, next) {
-  console.log('hit db app.js')
+// UPDATE
+app.put('/profiles/:id', function (req, res, next) {
   const profile = pathOr(null, ['params', 'id'], req)
   const body = pathOr(null, ['body'], req)
 
@@ -119,40 +116,38 @@ app.put('/profiles/:id', function(req, res, next) {
     )
   }
 
-  dal.updateProfile(body, function(err, response) {
+  dal.updateProfile(body, function (err, response) {
     if (err) return next(new HTTPError(err.status, err.message, err))
     res.status(200).send(response)
   })
 })
 
-//////DELETE
-app.delete('/profiles/:id', function(req, res, next) {
+// DELETE
+app.delete('/profiles/:id', function (req, res, next) {
   const id = pathOr(null, ['params', 'id'], req)
 
-  dal.deleteProfile(id, function(err, result) {
+  dal.deleteProfile(id, function (err, result) {
     if (err) return next(new HTTPError(err.status, err.message, err))
     res.status(200).send(result)
   })
 })
 
-////////LIST
-app.get('/profiles', function(req, res, next) {
+// LIST
+app.get('/profiles', function (req, res, next) {
   const limit = pathOr(5, ['query', 'limit'], req)
   const lastItem = pathOr(null, ['query', 'lastItem'], req)
   const filter = pathOr(null, ['query', 'filter'], req)
 
-  dal.listProfiles(filter, lastItem, Number(limit), function(err, data) {
+  dal.listProfiles(filter, lastItem, Number(limit), function (err, data) {
     if (err) return next(new HTTPError(err.status, err.message, err))
     res.status(200).send(data)
   })
 })
 
-////////////////////
-///CONTACTS
-///////////////////
+// CONTACTS
 
-//////CREATE
-app.post('/profiles/:id/contacts', function(req, res, next) {
+// CREATE
+app.post('/profiles/:id/contacts', function (req, res, next) {
   const id = pathOr(null, ['profile', '_id'], req)
   const contact = pathOr(null, ['body'], req)
   const fieldResults = checkContactFields(contact)
@@ -162,19 +157,18 @@ app.post('/profiles/:id/contacts', function(req, res, next) {
       new HTTPError(400, 'Missing required fields', { fields: fieldResults })
     )
   }
-  dal.createContact(contact, function(err, result) {
+  dal.createContact(contact, function (err, result) {
     if (err) return next(new HTTPError(err.status, err.message, err))
     res.status(201).send(result)
   })
 })
 
-//////READ
-app.get('/profiles/:id/contacts/:contactId', function(req, res, next) {
-  console.log('req')
+// READ
+app.get('/profiles/:id/contacts/:contactId', function (req, res, next) {
   const contactId = pathOr(null, ['params', 'contactId'], req)
 
   if (contactId) {
-    dal.showContact(contactId, function(err, doc) {
+    dal.showContact(contactId, function (err, doc) {
       if (err) return next(new HTTPError(err.status, err.message, err))
       res.status(200).send(doc)
     })
@@ -183,11 +177,10 @@ app.get('/profiles/:id/contacts/:contactId', function(req, res, next) {
   }
 })
 
-//////UPDATE
-app.put('/profiles/:id/contacts/:contactId', function(req, res, next) {
+// UPDATE
+app.put('/profiles/:id/contacts/:contactId', function (req, res, next) {
   const contact = pathOr(null, ['params', 'id'], req)
   const body = pathOr(null, ['body'], req)
-  console.log('req')
 
   const fieldResults = checkUpdateContactFields(body)
   if (!body || keys(body).length === 0)
@@ -201,20 +194,17 @@ app.put('/profiles/:id/contacts/:contactId', function(req, res, next) {
     )
   }
 
-  dal.updateContact(body, function(err, response) {
+  dal.updateContact(body, function (err, response) {
     if (err) return next(new HTTPError(err.status, err.message, err))
     res.status(200).send(response)
   })
 })
 
-//////DELETE
-app.delete('/profiles/:id/contacts/:contactId', function(req, res, next) {
-  //  const id = pathOr(null, ['params', 'id'], req)
+// DELETE
+app.delete('/profiles/:id/contacts/:contactId', function (req, res, next) {
   const contactId = pathOr(null, ['params', 'contactId'], req)
-  //console.log('app id', id)
-  // console.log('app contactId', contactId)
   if (contactId) {
-    dal.deleteContact(contactId, function(err, result) {
+    dal.deleteContact(contactId, function (err, result) {
       if (err) return next(new HTTPError(err.status, err.message, err))
       res.status(200).send(result)
     })
@@ -223,26 +213,23 @@ app.delete('/profiles/:id/contacts/:contactId', function(req, res, next) {
   }
 })
 
-//////LIST
-app.get('/profiles/:id/contacts', function(req, res, next) {
+// LIST
+app.get('/profiles/:id/contacts', function (req, res, next) {
   const id = pathOr(null, ['params', 'id'], req)
-  console.log('id', id)
   const limit = pathOr(5, ['query', 'limit'], req)
   const lastItem = pathOr(null, ['query', 'lastItem'], req)
   const filter = pathOr(null, ['query', 'filter'], req)
 
-  dal.listContacts(id, filter, lastItem, Number(limit), function(err, data) {
+  dal.listContacts(id, filter, lastItem, Number(limit), function (err, data) {
     if (err) return next(new HTTPError(err.status, err.message, err))
     res.status(200).send(data)
   })
 })
 
-////////////////////
-///VENUES
-///////////////////
+// VENUES
 
-//////CREATE
-app.post('/venues', function(req, res, next) {
+// CREATE
+app.post('/venues', function (req, res, next) {
   const venue = pathOr(null, ['body'], req)
   const fieldResults = checkVenueFields(venue)
 
@@ -251,18 +238,18 @@ app.post('/venues', function(req, res, next) {
       new HTTPError(400, 'Missing required fields', { fields: fieldResults })
     )
   }
-  dal.createVenue(venue, function(err, result) {
+  dal.createVenue(venue, function (err, result) {
     if (err) return next(new HTTPError(err.status, err.message, err))
     res.status(201).send(result)
   })
 })
 
-//////READ
-app.get('/venues/:id', function(req, res, next) {
+// READ
+app.get('/venues/:id', function (req, res, next) {
   const id = pathOr(null, ['params', 'id'], req)
 
   if (id) {
-    dal.showVenue(id, function(err, doc) {
+    dal.showVenue(id, function (err, doc) {
       if (err) return next(new HTTPError(err.status, err.message, err))
       res.status(200).send(doc)
     })
@@ -271,8 +258,8 @@ app.get('/venues/:id', function(req, res, next) {
   }
 })
 
-//////UPDATE
-app.put('/venues/:id', function(req, res, next) {
+// UPDATE
+app.put('/venues/:id', function (req, res, next) {
   const venue = pathOr(null, ['params', 'id'], req)
   const body = pathOr(null, ['body'], req)
 
@@ -288,40 +275,36 @@ app.put('/venues/:id', function(req, res, next) {
     )
   }
 
-  dal.updateVenue(body, function(err, response) {
+  dal.updateVenue(body, function (err, response) {
     if (err) return next(new HTTPError(err.status, err.message, err))
     res.status(200).send(response)
   })
 })
 
-//////DELETE
-app.delete('/venues/:id', function(req, res, next) {
+// DELETE
+app.delete('/venues/:id', function (req, res, next) {
   const id = pathOr(null, ['params', 'id'], req)
 
-  dal.deleteVenue(id, function(err, result) {
+  dal.deleteVenue(id, function (err, result) {
     if (err) return next(new HTTPError(err.status, err.message, err))
     res.status(200).send(result)
   })
 })
 
-//////LIST
-app.get('/venues', function(req, res, next) {
+// LIST
+app.get('/venues', function (req, res, next) {
   const limit = pathOr(5, ['query', 'limit'], req)
   const lastItem = pathOr(null, ['query', 'lastItem'], req)
   const filter = pathOr(null, ['query', 'filter'], req)
 
-  dal.listVenues(filter, lastItem, Number(limit), function(err, data) {
+  dal.listVenues(filter, lastItem, Number(limit), function (err, data) {
     if (err) return next(new HTTPError(err.status, err.message, err))
     res.status(200).send(data)
   })
 })
 
-////////////////////
-///ERROR MIDDLEWARE
-///////////////////
-
-app.use(function(err, req, res, next) {
-  console.log(req.method, req.path, err)
+// ERROR MIDDLEWARE
+app.use(function (err, req, res, next) {
   res.status(err.status || 500)
   res.send(err)
 })

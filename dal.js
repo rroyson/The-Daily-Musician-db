@@ -10,19 +10,11 @@ const { pathOr, assoc, split, head, last } = require('ramda')
 const uuidv4 = require('uuid/v4')
 const uuid = uuidv4()
 
-const test = callback => {
-  callback(null, 'dal is ok')
-}
+// PROFILES
 
-////////////////////
-////////PROFILES
-////////////////////
-
-//////CREATE
+// CREATE
 const createProfile = (profile, callback) => {
-  const firstName = pathOr('', ['firstName'], profile)
-  const lastName = pathOr('', ['lastName'], profile)
-  const email = pathOr('', ['email'], profile)
+  const { firstName, lastName, email } = profile
   const pk = generateProfilePk(`${firstName}_${lastName}_${email}`)
 
   profile = assoc('_id', pk, profile)
@@ -30,9 +22,10 @@ const createProfile = (profile, callback) => {
 
   createDoc(profile, callback)
 }
-//////READ
+
+// READ
 const showProfile = (id, callback) => {
-  db.get(id, function(err, doc) {
+  db.get(id, function (err, doc) {
     if (err) return callback(err)
 
     doc.type === 'profile'
@@ -40,12 +33,14 @@ const showProfile = (id, callback) => {
       : callback(new HTTPError(400, 'Document is not a profile'))
   })
 }
-//////UPDATE
+
+// UPDATE
 function updateProfile(profile, callback) {
   profile = assoc('type', 'profile', profile)
   createDoc(profile, callback)
 }
-//////DELETE
+
+// DELETE
 function deleteProfile(id, callback) {
   db
     .get(id)
@@ -60,7 +55,7 @@ function deleteProfile(id, callback) {
     .then(err => callback(err))
 }
 
-///////LIST
+// LIST
 function listProfiles(filter, lastItem, limit, callback) {
   var query = {}
   if (filter) {
@@ -91,38 +86,28 @@ function listProfiles(filter, lastItem, limit, callback) {
     }
   }
 
-  find(query, function(err, data) {
+  find(query, function (err, data) {
     if (err) return callback(err)
     callback(null, data.docs)
   })
 }
 
-////////////////////
-///CONTACTS
-///////////////////
+// CONTACTS
 
-//////CREATE
+// CREATE
 const createContact = (contact, callback) => {
-  const firstName = pathOr('', ['firstName'], contact)
-  const lastName = pathOr('', ['lastName'], contact)
-  const email = pathOr('', ['email'], contact)
-  const profileId = pathOr('', ['profileId'], contact)
-  console.log('profileId=', profileId)
-  console.log('contact=', contact)
+  const { firstName, lastName, email, profileId } = contact
   const pk = generateContactPk(`${profileId}_${firstName}_${lastName}_${email}`)
-
-  console.log('pk', pk)
 
   contact = assoc('_id', pk, contact)
   contact = assoc('type', 'contact', contact)
-  //contact = assoc('profileId', profileId, contact)
 
   createDoc(contact, callback)
 }
 
-//////READ
+// READ
 const showContact = (id, callback) => {
-  db.get(id, function(err, doc) {
+  db.get(id, function (err, doc) {
     if (err) return callback(err)
 
     doc.type === 'contact'
@@ -131,13 +116,13 @@ const showContact = (id, callback) => {
   })
 }
 
-//////UPDATE
+// UPDATE
 function updateContact(contact, callback) {
   contact = assoc('type', 'contact', contact)
   createDoc(contact, callback)
 }
 
-//////DELETE
+// DELETE
 function deleteContact(contactId, callback) {
   db
     .get(contactId)
@@ -152,19 +137,9 @@ function deleteContact(contactId, callback) {
     .catch(err => callback(err))
 }
 
-//////LIST
+// LIST
 function listContacts(profileId, filter, lastItem, limit, callback) {
   limit = limit ? limit : 5
-  //   const getProfileId = id => {
-  //     db.get(id).then(docs => callback(null, docs)).catch(err => callback(err))
-  //   }
-  // }
-  // let query = {
-  //   selector: {
-  //     type: 'contact'
-  //   },
-  //   limit
-  // }
   let query = {}
 
   if (profileId) {
@@ -177,51 +152,19 @@ function listContacts(profileId, filter, lastItem, limit, callback) {
     }
   }
 
-  //
-  //   if (filter) {
-  //     const arrFilter = split(':', filter)
-  //     const filterField = head(arrFilter)
-  //     const filterValue = last(arrFilter)
-  //
-  //     const selectorValue = assoc(filterField, filterValue, {})
-  //     query = {
-  //       selector: selectorValue,
-  //       limit
-  //     }
-  //   } else if (lastItem) {
-  //     query = {
-  //       selector: {
-  //         _id: { $gt: lastItem },
-  //         type: 'contact'
-  //       },
-  //       limit
-  //     }
-  //   } else {
-  //     query = {
-  //       selector: {
-  //         _id: { $gte: null },
-  //         type: 'contact'
-  //       },
-  //       limit
-  //     }
-  //   }
-  //
-  find(query, function(err, data) {
+  find(query, function (err, data) {
     if (err) return callback(err)
     callback(null, data.docs)
   })
 }
 
-////////////////////
-///VENUES
-///////////////////
+// VENUES
 
-//////CREATE
+// CREATE
 const createVenue = (venue, callback) => {
   const name = pathOr('', ['venueName'], venue)
   const address = pathOr('', ['address'], venue)
   const pk = generateVenuePk(`${name}_${address}`)
-  console.log('pk', pk)
 
   venue = assoc('_id', pk, venue)
   venue = assoc('type', 'venue', venue)
@@ -229,9 +172,9 @@ const createVenue = (venue, callback) => {
   createDoc(venue, callback)
 }
 
-//////READ
+// READ
 const showVenue = (id, callback) => {
-  db.get(id, function(err, doc) {
+  db.get(id, function (err, doc) {
     if (err) return callback(err)
 
     doc.type === 'venue'
@@ -240,13 +183,13 @@ const showVenue = (id, callback) => {
   })
 }
 
-//////UPDATE
+// UPDATE
 function updateVenue(venue, callback) {
   venue = assoc('type', 'venue', venue)
   createDoc(venue, callback)
 }
 
-//////DELETE
+// DELETE
 function deleteVenue(id, callback) {
   db
     .get(id)
@@ -255,7 +198,7 @@ function deleteVenue(id, callback) {
     .then(err => callback(err))
 }
 
-//////LIST
+// LIST
 function listVenues(filter, lastItem, limit, callback) {
   var query = {}
   if (filter) {
@@ -286,27 +229,22 @@ function listVenues(filter, lastItem, limit, callback) {
     }
   }
 
-  find(query, function(err, data) {
+  find(query, function (err, data) {
     if (err) return callback(err)
     callback(null, data.docs)
   })
 }
 
-////////////////////
-///HELPER FUNCTIONS
-///////////////////
-
+// HELPERS
 function createDoc(doc, callback) {
   db.put(doc).then(res => callback(null, res)).catch(err => callback(err))
 }
 
 function find(query, callback) {
-  console.log('query', query)
   query ? db.find(query, callback) : callback(null, [])
 }
 
 const dal = {
-  test,
   createProfile,
   showProfile,
   updateProfile,
